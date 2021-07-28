@@ -125,31 +125,31 @@ class TriviaSession:
             )
             self.stop()
 
-    async def run(self):
-        """Run the trivia session.
-
-        In order for the trivia session to be stopped correctly, this should
-        only be called internally by `TriviaSession.start`.
-        """
-        await self._send_startup_msg()
-        max_score = self.settings["max_score"]
-        delay = self.settings["delay"]
-        timeout = self.settings["timeout"]
-        for question, answers in self._iter_questions():
-            async with self.ctx.typing():
-                await asyncio.sleep(3)
-            self.count += 1
-            msg = bold(_("Question number {num}!").format(num=self.count)) + "\n\n" + question
-            await self.ctx.send(msg)
-            continue_ = await self.wait_for_answer(answers, delay, timeout)
-            if continue_ is False:
-                break
-            if any(score >= max_score for score in self.scores.values()):
-                await self.end_game()
-                break
-        else:
-            await self.ctx.send(_("There are no more questions!"))
+   async def run(self):
+    """Run the trivia session.
+    In order for the trivia session to be stopped correctly, this should
+    only be called internally by `TriviaSession.start`.
+    """
+    await self._send_startup_msg()
+    max_score = self.settings["max_score"]
+    delay = self.settings["delay"]
+    timeout = self.settings["timeout"]
+    for question, answers in self._iter_questions():
+        async with self.ctx.typing():
+            await asyncio.sleep(3)
+        self.count += 1
+        msg = bold(_("Question number {num}!").format(num=self.count)) + "\n\n" + question
+        await self.ctx.send(msg)
+        continue_ = await self.wait_for_answer(answers, delay, timeout)
+        if continue_ is False:
+            break
+        if any(score >= max_score for score in self.scores.values()):
             await self.end_game()
+            break
+        await asyncio.sleep(15)
+    else:
+        await self.ctx.send(_("There are no more questions!"))
+        await self.end_game()
 
     async def _send_startup_msg(self):
         list_names = []
